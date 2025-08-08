@@ -8,7 +8,8 @@ run:
 
 output:
   formats:
-    - format: colored-line-number
+    colored-line-number: # Теперь map вместо slice
+      format: colored-line-number
       print-issued-lines: true
       print-linter-name: true
 
@@ -68,7 +69,7 @@ linters:
           - errcheck
         text: "Error return value of `b.AnswerCallbackQuery` is not checked"
 
-settings: # Заменяет linters-settings
+settings:
   govet:
     enable:
       - shadow
