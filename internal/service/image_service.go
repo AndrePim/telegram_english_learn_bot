@@ -40,7 +40,7 @@ func (s *ImageService) GenerateImage(word string) (string, error) {
 	}
 
 	prompt := fmt.Sprintf("A simple, clear illustration of: %s. Educational style, suitable for language learning.", word)
-	
+
 	reqBody := ImageRequest{
 		Prompt: prompt,
 		N:      1,
@@ -82,4 +82,3 @@ func (s *ImageService) GenerateImage(word string) (string, error) {
 
 	return imageResp.Data[0].URL, nil
 }
-
