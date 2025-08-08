@@ -8,8 +8,7 @@ run:
 
 output:
   formats:
-    text: # Map с ключом text
-      format: colored-line-number
+    text:
       path: stdout
       colors: true
       print-issued-lines: true
