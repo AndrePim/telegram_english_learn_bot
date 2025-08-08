@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	botHandlers "github.com/AndrePim/telegram_english_learn_bot"
+	botHandlers "github.com/AndrePim/telegram_english_learn_bot/internal/bot"
 	"github.com/AndrePim/telegram_english_learn_bot/internal/repository"
 	"github.com/AndrePim/telegram_english_learn_bot/internal/service"
 	"github.com/go-telegram/bot"
@@ -61,7 +61,7 @@ func main() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, handlers.StartHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/help", bot.MatchTypeExact, handlers.HelpHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/add", bot.MatchTypePrefix, handlers.AddHandler)
-	b.RegisterHandler(bot.HandlerTypeMessageText, "/words", bot.MatchTypeExact, handlers.WordsHandler)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/words", bot.MatchTypePrefix, handlers.WordsHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/quiz", bot.MatchTypeExact, handlers.QuizHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/review", bot.MatchTypeExact, handlers.ReviewHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/delete", bot.MatchTypePrefix, handlers.DeleteHandler)
@@ -69,6 +69,7 @@ func main() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/image", bot.MatchTypePrefix, handlers.ImageHandler)
 	b.RegisterHandler(bot.HandlerTypeCallbackQueryData, "", bot.MatchTypePrefix, handlers.CallbackHandler)
 
+	log.Println("Registered handlers: /start, /help, /add, /words, /quiz, /review, /delete, /stats, /image, callback")
 	// Создаем контекст для graceful shutdown
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()

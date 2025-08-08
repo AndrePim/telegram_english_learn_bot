@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-telegram/bot"
-	"github.com/go-telegram/bot/models"
 	"github.com/AndrePim/telegram_english_learn_bot/internal/repository"
 	"github.com/AndrePim/telegram_english_learn_bot/internal/service"
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 )
 
 type BotHandlers struct {
@@ -152,6 +152,7 @@ func (h *BotHandlers) AddHandler(ctx context.Context, b *bot.Bot, update *models
 // WordsHandler обрабатывает команду /words
 func (h *BotHandlers) WordsHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	userID := update.Message.From.ID
+	log.Printf("Received /words command from user %d", userID)
 
 	words, err := h.wordService.GetUserWords(userID)
 	if err != nil {
@@ -173,56 +174,68 @@ func (h *BotHandlers) WordsHandler(ctx context.Context, b *bot.Bot, update *mode
 
 	var response strings.Builder
 	response.WriteString("📚 Ваши слова:\n\n")
-
 	for i, word := range words {
-		response.WriteString(fmt.Sprintf("%d. *%s* - %s", i+1, word.Word, word.Translation))
+		response.WriteString(fmt.Sprintf("%d. %s - %s", i+1, word.Word, word.Translation))
 		if word.Context != "" {
 			response.WriteString(fmt.Sprintf(" (%s)", word.Context))
 		}
 		response.WriteString("\n")
 	}
 
-	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID:    update.Message.Chat.ID,
-		Text:      response.String(),
-		ParseMode: models.ParseModeMarkdown,
+	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: update.Message.Chat.ID,
+		Text:   response.String(),
+		// ParseMode убран
 	})
+	if err != nil {
+		log.Printf("Failed to send message: %v", err)
+	}
 }
 
 // QuizHandler обрабатывает команду /quiz
 func (h *BotHandlers) QuizHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	userID := update.Message.From.ID
+	log.Printf("Received /quiz command from user %d", userID)
 
 	quiz, err := h.wordService.GenerateQuiz(userID)
 	if err != nil {
 		log.Printf("Failed to generate quiz: %v", err)
-		b.SendMessage(ctx, &bot.SendMessageParams{
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
 			Text:   "Не удалось создать тест. Убедитесь, что у вас есть минимум 4 слова.",
 		})
+		if err != nil {
+			log.Printf("Failed to send error message: %v", err)
+		}
 		return
 	}
 
-	// Создаем inline клавиатуру с вариантами ответов
 	keyboard := &models.InlineKeyboardMarkup{
 		InlineKeyboard: make([][]models.InlineKeyboardButton, len(quiz.Options)),
 	}
-
 	for i, option := range quiz.Options {
+		if option == "" {
+			log.Printf("Empty option detected at index %d", i) // Добавлено для отладки
+		}
+		safeOption := strings.ReplaceAll(option, "_", "\\_")
 		keyboard.InlineKeyboard[i] = []models.InlineKeyboardButton{
 			{
-				Text:         fmt.Sprintf("%d. %s", i+1, option),
+				Text:         fmt.Sprintf("%d. %s", i+1, safeOption),
 				CallbackData: fmt.Sprintf("quiz_%d_%d_%d", quiz.WordID, i, quiz.CorrectIdx),
 			},
 		}
 	}
 
-	b.SendMessage(ctx, &bot.SendMessageParams{
+	safeQuestion := strings.ReplaceAll(quiz.Question, "_", "\\_")
+	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:      update.Message.Chat.ID,
-		Text:        quiz.Question,
-		ParseMode:   models.ParseModeMarkdown,
+		Text:        safeQuestion,
 		ReplyMarkup: keyboard,
+		// ParseMode: models.ParseModeMarkdown, // Убран
 	})
+	if err != nil {
+		log.Printf("Failed to send quiz message: %v", err)
+	}
 }
 
 // ReviewHandler обрабатывает команду /review

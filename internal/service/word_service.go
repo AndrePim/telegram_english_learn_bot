@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"strings"
 	"time"
@@ -64,65 +65,51 @@ type QuizQuestion struct {
 
 // GenerateQuiz генерирует тест для пользователя
 func (s *WordService) GenerateQuiz(userID int64) (*QuizQuestion, error) {
-	words, err := s.wordRepo.GetWordsForReview(userID)
+	log.Printf("Generating quiz for user %d", userID)
+	words, err := s.wordRepo.GetUserWords(userID) // Используем GetUserWords
 	if err != nil {
+		log.Printf("Failed to get words for quiz: %v", err)
 		return nil, fmt.Errorf("failed to get words for quiz: %w", err)
 	}
-
-	if len(words) == 0 {
-		return nil, fmt.Errorf("no words available for quiz")
+	if len(words) < 4 {
+		log.Printf("Not enough words for quiz: %d", len(words))
+		return nil, fmt.Errorf("need at least 4 words to generate quiz")
 	}
 
 	// Выбираем случайное слово
 	rand.Seed(time.Now().UnixNano())
-	targetWord := words[rand.Intn(len(words))]
-
-	// Получаем все слова пользователя для создания вариантов ответов
-	allWords, err := s.wordRepo.GetUserWords(userID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get all words: %w", err)
-	}
-
-	if len(allWords) < 4 {
-		return nil, fmt.Errorf("need at least 4 words to generate quiz")
-	}
+	targetIdx := rand.Intn(len(words))
+	targetWord := words[targetIdx]
 
 	// Создаем варианты ответов
-	options := []string{targetWord.Translation}
-	correctIdx := 0
+	options := make([]string, 4)
+	correctIdx := rand.Intn(4)
+	options[correctIdx] = targetWord.Translation
 
-	// Добавляем 3 неправильных варианта
-	for len(options) < 4 {
-		randomWord := allWords[rand.Intn(len(allWords))]
-		if randomWord.ID != targetWord.ID {
-			// Проверяем, что такого варианта еще нет
-			exists := false
-			for _, option := range options {
-				if option == randomWord.Translation {
-					exists = true
-					break
-				}
-			}
-			if !exists {
-				options = append(options, randomWord.Translation)
-			}
+	// Отслеживаем использованные индексы
+	usedIndices := map[int]bool{targetIdx: true}
+	optionIdx := 0
+
+	// Заполняем остальные варианты
+	for optionIdx < 4 {
+		if optionIdx == correctIdx {
+			optionIdx++
+			continue
+		}
+		randIdx := rand.Intn(len(words))
+		if !usedIndices[randIdx] {
+			options[optionIdx] = words[randIdx].Translation
+			usedIndices[randIdx] = true
+			optionIdx++
 		}
 	}
 
-	// Перемешиваем варианты
-	for i := len(options) - 1; i > 0; i-- {
-		j := rand.Intn(i + 1)
-		options[i], options[j] = options[j], options[i]
-		if i == correctIdx {
-			correctIdx = j
-		} else if j == correctIdx {
-			correctIdx = i
-		}
-	}
+	// Логируем варианты для отладки
+	log.Printf("Quiz options: %v, correctIdx: %d", options, correctIdx)
 
 	return &QuizQuestion{
 		WordID:     targetWord.ID,
-		Question:   fmt.Sprintf("Как переводится слово: *%s*?", targetWord.Word),
+		Question:   fmt.Sprintf("Как переводится слово: %s?", targetWord.Word),
 		Options:    options,
 		CorrectIdx: correctIdx,
 	}, nil
