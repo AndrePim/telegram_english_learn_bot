@@ -8,8 +8,7 @@ run:
 
 output:
   formats:
-    colored-line-number: # Теперь map вместо slice
-      format: colored-line-number
+    - format: colored-line-number
       print-issued-lines: true
       print-linter-name: true
 
@@ -19,10 +18,10 @@ formatters:
     - goimports
   settings:
     goimports:
-      local-prefixes: github.com/AndrePim/telegram_english_learn_bot
+      local-prefixes: ["github.com/AndrePim/telegram_english_learn_bot"]
 
 linters:
-  default: none # Аналог disable-all: true
+  default: none
   enable:
     - bodyclose
     - deadcode
@@ -69,10 +68,10 @@ linters:
           - errcheck
         text: "Error return value of `b.AnswerCallbackQuery` is not checked"
 
-linters-settings:
+settings: # Заменяет linters-settings
   govet:
     enable:
-      - shadow # Заменяет check-shadowing
+      - shadow
   golint:
     min-confidence: 0
   gocyclo:
@@ -99,10 +98,3 @@ linters-settings:
       - octalLiteral
       - whyNoLint
       - wrapperFunc
-
-issues:
-  exclude-use-default: false
-  exclude:
-    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv). is not checked
-  max-issues-per-linter: 0
-  max-same-issues: 0
