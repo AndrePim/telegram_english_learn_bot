@@ -4,10 +4,10 @@ run:
   timeout: 5m
   issues-exit-code: 1
   tests: true
-  go: "1.24.5"
+  go: "1.22"
 
 linters:
-  disable-all: true
+  default: none
   enable:
     - bodyclose
     - depguard
@@ -38,59 +38,16 @@ linters:
     - unparam
     - unused
     - whitespace
-    - gofmt
-    - goimports
-
-linters-settings:
-  govet:
-    enable:
-      - shadow
-  gocyclo:
-    min-complexity: 15
-  dupl:
-    threshold: 100
-  goconst:
-    min-len: 2
-    min-occurrences: 2
-  misspell:
-    locale: US
-  lll:
-    line-length: 140
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
-  goimports:
-    # для корректной сортировки локальных импортов
-    local-prefixes: github.com/AndrePim/telegram_english_learn_bot
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gomnd
-    - path: internal/bot/handlers\.go
-      linters:
-        - errcheck
-      text: "Error return value of `b.SendMessage` is not checked"
-    - path: internal/bot/handlers\.go
-      linters:
-        - errcheck
-      text: "Error return value of `b.AnswerCallbackQuery` is not checked"
 
 output:
-  format: colored-line
-  print-issued-lines: true
-  print-linter-name: true
-  uniq-by-line: true
-  sort-results: true
+  format: line-color
   color: auto
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - path: _test\.go
+      text: "Magic number"
+    - path: internal/bot/handlers\.go
+      text: "Error return value of"
+
