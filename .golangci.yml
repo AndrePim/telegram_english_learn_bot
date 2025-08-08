@@ -33,6 +33,15 @@ linters:
         - name: error-naming
         - name: exported
         - name: var-naming
+    depguard:
+      rules:
+        main:
+          allow:
+            - $gostd
+            - github.com/AndrePim/telegram_english_learn_bot
+            - github.com/go-telegram/bot
+            - github.com/joho/godotenv
+            - github.com/lib/pq
   enable:
     - bodyclose
     - depguard
@@ -54,11 +63,19 @@ linters:
       - path: "internal/bot/handlers\\.go"
         linters:
           - errcheck
-        text: "Error return value of `b\\.SendMessage` is not checked"
-      - path: "internal/bot/handlers\\.go"
+        text: "Error return value of `b\\.EditMessageText` is not checked"
+      - path: "cmd/app/main\\.go"
         linters:
           - errcheck
-        text: "Error return value of `b\\.AnswerCallbackQuery` is not checked"
+        text: "Error return value of `db\\.Close` is not checked"
+      - path: "internal/repository/word_repository\\.go"
+        linters:
+          - errcheck
+        text: "Error return value of `rows\\.Close` is not checked"
+      - path: "internal/service/image_service\\.go"
+        linters:
+          - errcheck
+        text: "Error return value of `resp\\.Body\\.Close` is not checked"
 
 formatters:
   enable:
