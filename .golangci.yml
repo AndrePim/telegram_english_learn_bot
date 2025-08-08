@@ -1,36 +1,26 @@
-version: "2" # Версия конфигурации v2
+version: "2"
 
 run:
   timeout: 5m
   issues-exit-code: 1
   tests: true
-  go: '1.24.5'
-  modules-download-mode: readonly
+  # Убедись, что версия Go соответствует реальной версии в CI (например, '1.22')
+  go: "1.22"
 
-output:
-  formats:
-    text:
-      path: stdout
-      colors: true
-      print-issued-lines: true
-      print-linter-name: true
-
+# Включаем форматтеры кода (не путать с форматом вывода)
 formatters:
   enable:
     - gofmt
     - goimports
 
+# Настройки линтеров и форматтеров
 linters-settings:
   goimports:
-    local-prefixes: ["github.com/AndrePim/telegram_english_learn_bot"]
-  mnd:
-    checks:
-      - argument
-      - case
-      - condition
-      - operation
-      - return
-      - assign
+    local-prefixes:
+      - github.com/AndrePim/telegram_english_learn_bot
+  govet:
+    enable:
+      - shadow
   gocyclo:
     min-complexity: 15
   dupl:
@@ -43,44 +33,38 @@ linters-settings:
   lll:
     line-length: 140
   gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
-  revive:
-    rules:
-      - name: blank-imports
-      - name: context-as-argument
-      - name: dot-imports
-      - name: error-return
-      - name: error-strings
-      - name: error-naming
-      - name: exported
-      - name: var-naming
+    enabled-tags: [diagnostic, experimental, opinionated, performance, style]
+    disabled-checks: [dupImport, ifElseChain, octalLiteral, whyNoLint, wrapperFunc]
+  # golint устарел — лучше убрать или перейти на revive/stylecheck
+  # golint:
+  #   min-confidence: 0
+
+# Формат вывода сообщений линтера
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
 
 linters:
-  disable-all: true
+  default: none
   enable:
     - bodyclose
     - depguard
     - dogsled
     - dupl
     - errcheck
+    - exportloopref
     - exhaustive
     - gochecknoinits
     - goconst
     - gocritic
     - gocyclo
+    # - golint        # устарел — лучше отключить
+    - gomnd
     - goprintffuncname
     - gosec
+    - gosimple
+    - govet
     - ineffassign
     - lll
     - misspell
@@ -88,28 +72,20 @@ linters:
     - noctx
     - nolintlint
     - rowserrcheck
+    - staticcheck
+    - stylecheck
     - unconvert
     - unparam
     - unused
     - whitespace
-    - mnd
-    - revive
-  exclude:
-    - 'Error return value of `b\.SendMessage` is not checked'
-    - 'Error return value of `b\.AnswerCallbackQuery` is not checked'
-  exclude-dirs:
-    - _test\.go
 
 issues:
   exclude-rules:
     - path: _test\.go
-      linters:
-        - mnd
+      linters: [gomnd]
     - path: internal/bot/handlers.go
-      linters:
-        - errcheck
+      linters: [errcheck]
       text: "Error return value of `b.SendMessage` is not checked"
     - path: internal/bot/handlers.go
-      linters:
-        - errcheck
+      linters: [errcheck]
       text: "Error return value of `b.AnswerCallbackQuery` is not checked"
