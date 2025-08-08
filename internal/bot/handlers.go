@@ -14,43 +14,49 @@ import (
 )
 
 // BotHandlers содержит обработчики команд бота
-type BotHandlers struct {
+type Handlers struct {
 	userService *service.UserService
 	wordService *service.WordService
 }
 
 // NewBotHandlers создает новый экземпляр BotHandlers с необходимыми сервисами
-func NewBotHandlers(userService *service.UserService, wordService *service.WordService) *BotHandlers {
-	return &BotHandlers{
+func NewHandlers(userService *service.UserService, wordService *service.WordService) *Handlers {
+	return &Handlers{
 		userService: userService,
 		wordService: wordService,
 	}
 }
 
 // DefaultHandler обрабатывает неизвестные команды
-func (h *BotHandlers) DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *Handlers) DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if update.Message == nil {
 		return
 	}
 	// Игнорируем сообщения, которые не являются командами
-	b.SendMessage(ctx, &bot.SendMessageParams{
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
 		Text:   "Извините, я не понимаю эту команду. Используйте /help для получения справки.",
 	})
+	if err != nil {
+		log.Printf("Failed to send message: %v", err)
+	}
 }
 
 // StartHandler обрабатывает команду /start
-func (h *BotHandlers) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *Handlers) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	user := update.Message.From
 
 	// Регистрируем пользователя
 	err := h.userService.RegisterUser(user.ID, user.Username, user.FirstName, user.LastName)
 	if err != nil {
 		log.Printf("Failed to register user: %v", err)
-		b.SendMessage(ctx, &bot.SendMessageParams{
+		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
 			Text:   "Произошла ошибка при регистрации. Попробуйте позже.",
 		})
+		if err != nil {
+			log.Printf("Failed to send message: %v", err)
+		}
 		return
 	}
 
@@ -66,14 +72,17 @@ func (h *BotHandlers) StartHandler(ctx context.Context, b *bot.Bot, update *mode
 
 Начните с добавления слов командой /add!`, user.FirstName)
 
-	b.SendMessage(ctx, &bot.SendMessageParams{
+	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
 		Text:   welcomeText,
 	})
+	if err != nil {
+		log.Printf("Failed to send message: %v", err)
+	}
 }
 
 // HelpHandler обрабатывает команду /help
-func (h *BotHandlers) HelpHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *Handlers) HelpHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	helpText := `🤖 Справка по боту для изучения английского
 
 📝 /add - Добавить новое слово
@@ -97,10 +106,13 @@ func (h *BotHandlers) HelpHandler(ctx context.Context, b *bot.Bot, update *model
 💡 Совет: Добавляйте контекст к словам для лучшего запоминания!
 Пример: /add beautiful - красивый (She is beautiful)`
 
-	b.SendMessage(ctx, &bot.SendMessageParams{
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
 		Text:   helpText,
 	})
+	if err != nil {
+		log.Printf("Failed to send message: %v", err)
+	}
 }
 
 // AddHandler обрабатывает команду /add
@@ -283,7 +295,7 @@ func (h *BotHandlers) ReviewHandler(ctx context.Context, b *bot.Bot, update *mod
 }
 
 // CallbackHandler обрабатывает callback запросы (ответы на тесты)
-func (h *BotHandlers) CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *Handlers) CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	callback := update.CallbackQuery
 	data := callback.Data
 
@@ -313,20 +325,26 @@ func (h *BotHandlers) CallbackHandler(ctx context.Context, b *bot.Bot, update *m
 	}
 
 	// Отвечаем на callback
-	b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+	_, err = b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 		CallbackQueryID: callback.ID,
 		Text:            responseText,
 		ShowAlert:       true,
 	})
+	if err != nil {
+		log.Printf("Failed to answer callback query: %v", err)
+	}
 
 	// Обновляем сообщение
 	if msg := callback.Message.Message; msg != nil {
-		b.EditMessageText(ctx, &bot.EditMessageTextParams{
+		_, err := b.EditMessageText(ctx, &bot.EditMessageTextParams{
 			ChatID:    msg.Chat.ID,
 			MessageID: msg.ID,
 			Text:      fmt.Sprintf("%s\n\n%s", msg.Text, responseText),
 			ParseMode: models.ParseModeMarkdown,
 		})
+		if err != nil {
+			log.Printf("Failed to edit message: %v", err)
+		}
 	}
 }
 
@@ -435,26 +453,36 @@ func (h *BotHandlers) ImageHandler(ctx context.Context, b *bot.Bot, update *mode
 	text := strings.TrimSpace(strings.TrimPrefix(update.Message.Text, "/image"))
 
 	if text == "" {
-		b.SendMessage(ctx, &bot.SendMessageParams{
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
 			Text:   "Используйте формат: /image [слово]\nПример: /image apple",
 		})
+		if err != nil {
+			log.Printf("Failed to send message: %v", err)
+		}
 		return
 	}
 
 	// Отправляем сообщение о том, что генерируем изображение
-	b.SendMessage(ctx, &bot.SendMessageParams{
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
 		Text:   "🎨 Генерирую изображение... Это может занять несколько секунд.",
 	})
+	if err != nil {
+		log.Printf("Failed to send message: %v", err)
+	}
 
 	// Здесь должна быть интеграция с ImageService
 	// Для демонстрации отправляем заглушку
-	b.SendMessage(ctx, &bot.SendMessageParams{
+	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
 		Text: fmt.Sprintf(
-			"🖼️ Изображение для слова '%s' будет здесь!\n\n💡 Для активации этой функции настройте OPENAI_API_KEY в переменных окружения.",
+			"🖼️ Изображение для слова '%s' будет здесь!\n\n"+
+				"💡 Для активации этой функции настройте OPENAI_API_KEY в переменных окружения.",
 			text,
 		),
 	})
+	if err != nil {
+		log.Printf("Failed to send message: %v", err)
+	}
 }
