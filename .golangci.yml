@@ -14,20 +14,10 @@ output:
       print-issued-lines: true
       print-linter-name: true
 
-formatters:
-  enable:
-    - gofmt
-    - goimports
-  settings:
-    goimports:
-      local-prefixes: ["github.com/AndrePim/telegram_english_learn_bot"]
-
-settings: # Заменяет linters-settings
+linters-settings:
   govet:
     enable:
       - shadow
-  golint:
-    min-confidence: 0
   gocyclo:
     min-complexity: 15
   dupl:
@@ -52,9 +42,11 @@ settings: # Заменяет linters-settings
       - octalLiteral
       - whyNoLint
       - wrapperFunc
+  goimports:
+    local-prefixes: ["github.com/AndrePim/telegram_english_learn_bot"]
 
 linters:
-  default: none
+  disable-all: true # Аналог default: none
   enable:
     - bodyclose
     - deadcode
@@ -68,7 +60,6 @@ linters:
     - goconst
     - gocritic
     - gocyclo
-    - golint
     - gomnd
     - goprintffuncname
     - gosec
@@ -87,16 +78,24 @@ linters:
     - unparam
     - unused
     - whitespace
-  exclusions:
-    rules:
-      - path: _test\.go
-        linters:
-          - gomnd
-      - path: internal/bot/handlers.go
-        linters:
-          - errcheck
-        text: "Error return value of `b.SendMessage` is not checked"
-      - path: internal/bot/handlers.go
-        linters:
-          - errcheck
-        text: "Error return value of `b.AnswerCallbackQuery` is not checked"
+    - gofmt
+    - goimports
+  exclude:
+    - 'Error return value of `b\.SendMessage` is not checked'
+    - 'Error return value of `b\.AnswerCallbackQuery` is not checked'
+  exclude-dirs:
+    - _test\.go
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+    - path: internal/bot/handlers.go
+      linters:
+        - errcheck
+      text: "Error return value of `b.SendMessage` is not checked"
+    - path: internal/bot/handlers.go
+      linters:
+        - errcheck
+      text: "Error return value of `b.AnswerCallbackQuery` is not checked"
