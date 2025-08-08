@@ -15,25 +15,24 @@ output:
       print-issued-lines: true
       print-linter-name: true
 
-linters_settings:
-  gocyclo:
-    min-complexity: 15
-  lll:
-    line-length: 120
-  misspell:
-    locale: US
-  revive:
-    rules:
-      - name: blank-imports
-      - name: context-as-argument
-      - name: dot-imports
-      - name: error-return
-      - name: error-strings
-      - name: error-naming
-      - name: exported
-      - name: var-naming
-
 linters:
+  settings:
+    gocyclo:
+      min-complexity: 15
+    lll:
+      line-length: 120
+    misspell:
+      locale: US
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+        - name: var-naming
   enable:
     - bodyclose
     - depguard
@@ -46,18 +45,22 @@ linters:
     - nakedret
     - unused
     - revive
+  exclusions:
+    rules:
+      - path: "_test\\.go"
+        linters:
+          - mnd
+        text: "Magic number"
+      - path: "internal/bot/handlers\\.go"
+        linters:
+          - errcheck
+        text: "Error return value of `b\\.SendMessage` is not checked"
+      - path: "internal/bot/handlers\\.go"
+        linters:
+          - errcheck
+        text: "Error return value of `b\\.AnswerCallbackQuery` is not checked"
 
-issues:
-  exclude_rules:
-    - path: "_test\\.go"
-      linters:
-        - mnd
-      text: "Magic number"
-    - path: "internal/bot/handlers\\.go"
-      linters:
-        - errcheck
-      text: "Error return value of `b\\.SendMessage` is not checked"
-    - path: "internal/bot/handlers\\.go"
-      linters:
-        - errcheck
-      text: "Error return value of `b\\.AnswerCallbackQuery` is not checked"
+formatters:
+  enable:
+    - gofmt
+    - goimports
