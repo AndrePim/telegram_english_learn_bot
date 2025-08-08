@@ -11,7 +11,6 @@ formatters:
     - gofmt
     - goimports
 
-formatters:
   settings:
     goimports:
       local-prefixes:
@@ -50,7 +49,6 @@ linters:
     - unused
     - whitespace
 
-linters:
   settings:
     govet:
       enable:
@@ -86,14 +84,13 @@ output:
     print-linter-name: true
     colors: true
 
-linters:
-  exclusions:
-    rules:
-      - path: _test\.go
-        linters: [gomnd]
-      - path: internal/bot/handlers.go
-        linters: [errcheck]
-        text: "Error return value of `b.SendMessage` is not checked"
-      - path: internal/bot/handlers.go
-        linters: [errcheck]
-        text: "Error return value of `b.AnswerCallbackQuery` is not checked"
+exclusions:
+  rules:
+    - path: _test\.go
+      linters: [gomnd]
+    - path: internal/bot/handlers.go
+      linters: [errcheck]
+      text: "Error return value of `b.SendMessage` is not checked"
+    - path: internal/bot/handlers.go
+      linters: [errcheck]
+      text: "Error return value of `b.AnswerCallbackQuery` is not checked"
