@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -77,13 +76,13 @@ func (s *WordService) GenerateQuiz(userID int64) (*QuizQuestion, error) {
 	}
 
 	// Выбираем случайное слово
-	rand.Seed(time.Now().UnixNano())
-	targetIdx := rand.Intn(len(words))
+	r := randv2.New(randv2.NewSource(time.Now().UnixNano()))
+	targetIdx := r.Intn(len(words))
 	targetWord := words[targetIdx]
 
 	// Создаем варианты ответов
 	options := make([]string, 4)
-	correctIdx := rand.Intn(4)
+	correctIdx := r.Intn(4)
 	options[correctIdx] = targetWord.Translation
 
 	// Отслеживаем использованные индексы
@@ -96,7 +95,7 @@ func (s *WordService) GenerateQuiz(userID int64) (*QuizQuestion, error) {
 			optionIdx++
 			continue
 		}
-		randIdx := rand.Intn(len(words))
+		randIdx := r.Intn(len(words))
 		if !usedIndices[randIdx] {
 			options[optionIdx] = words[randIdx].Translation
 			usedIndices[randIdx] = true
