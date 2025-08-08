@@ -54,7 +54,7 @@ jobs:
         DB_NAME: english_bot_db
 
     - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v6 # Обновлено до v6
+      uses: golangci/golangci-lint-action@v7 # Обновлено до v6
       with:
         version: v2.3.1 # Фиксируем версию
         args: --timeout=5m # Увеличиваем таймаут
