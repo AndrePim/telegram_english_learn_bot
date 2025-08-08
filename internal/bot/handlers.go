@@ -14,21 +14,21 @@ import (
 )
 
 // BotHandlers содержит обработчики команд бота
-type Handlers struct {
+type BotHandlers struct {
 	userService *service.UserService
 	wordService *service.WordService
 }
 
 // NewBotHandlers создает новый экземпляр BotHandlers с необходимыми сервисами
-func NewHandlers(userService *service.UserService, wordService *service.WordService) *Handlers {
-	return &Handlers{
+func NewBotHandlers(userService *service.UserService, wordService *service.WordService) *BotHandlers {
+	return &BotHandlers{
 		userService: userService,
 		wordService: wordService,
 	}
 }
 
 // DefaultHandler обрабатывает неизвестные команды
-func (h *Handlers) DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *BotHandlers) DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if update.Message == nil {
 		return
 	}
@@ -43,7 +43,7 @@ func (h *Handlers) DefaultHandler(ctx context.Context, b *bot.Bot, update *model
 }
 
 // StartHandler обрабатывает команду /start
-func (h *Handlers) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *BotHandlers) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	user := update.Message.From
 
 	// Регистрируем пользователя
@@ -82,7 +82,7 @@ func (h *Handlers) StartHandler(ctx context.Context, b *bot.Bot, update *models.
 }
 
 // HelpHandler обрабатывает команду /help
-func (h *Handlers) HelpHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *BotHandlers) HelpHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	helpText := `🤖 Справка по боту для изучения английского
 
 📝 /add - Добавить новое слово
@@ -295,7 +295,7 @@ func (h *BotHandlers) ReviewHandler(ctx context.Context, b *bot.Bot, update *mod
 }
 
 // CallbackHandler обрабатывает callback запросы (ответы на тесты)
-func (h *Handlers) CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *BotHandlers) CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	callback := update.CallbackQuery
 	data := callback.Data
 
