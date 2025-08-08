@@ -5,10 +5,12 @@ import (
 	"fmt"
 )
 
+// User представляет собой структуру пользователя
 type UserRepository struct {
 	db *sql.DB
 }
 
+// User представляет собой структуру пользователя
 func NewUserRepository(database *Database) *UserRepository {
 	return &UserRepository{db: database.db}
 }

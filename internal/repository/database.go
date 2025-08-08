@@ -8,6 +8,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Database представляет собой структуру для работы с базой данных
 type Database struct {
 	db *sql.DB
 }

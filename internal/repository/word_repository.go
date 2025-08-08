@@ -7,10 +7,12 @@ import (
 	"time"
 )
 
+// Word представляет собой структуру слова
 type WordRepository struct {
 	db *sql.DB
 }
 
+// Word представляет собой структуру слова
 func NewWordRepository(database *Database) *WordRepository {
 	return &WordRepository{db: database.db}
 }

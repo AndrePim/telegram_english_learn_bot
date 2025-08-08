@@ -80,6 +80,7 @@ func main() {
 	b.Start(ctx)
 }
 
+// Config содержит конфигурацию бота и базы данных
 type Config struct {
 	BotToken   string
 	DBHost     string
@@ -89,6 +90,7 @@ type Config struct {
 	DBName     string
 }
 
+// getConfig загружает конфигурацию из переменных окружения
 func getConfig() *Config {
 	return &Config{
 		BotToken:   getEnv("BOT_TOKEN", ""),
@@ -100,6 +102,7 @@ func getConfig() *Config {
 	}
 }
 
+// getEnv получает значение переменной окружения или возвращает значение по умолчанию
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value

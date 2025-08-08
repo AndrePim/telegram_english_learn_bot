@@ -13,11 +13,13 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
+// BotHandlers содержит обработчики команд бота
 type BotHandlers struct {
 	userService *service.UserService
 	wordService *service.WordService
 }
 
+// NewBotHandlers создает новый экземпляр BotHandlers с необходимыми сервисами
 func NewBotHandlers(userService *service.UserService, wordService *service.WordService) *BotHandlers {
 	return &BotHandlers{
 		userService: userService,
@@ -30,7 +32,7 @@ func (h *BotHandlers) DefaultHandler(ctx context.Context, b *bot.Bot, update *mo
 	if update.Message == nil {
 		return
 	}
-
+	// Игнорируем сообщения, которые не являются командами
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
 		Text:   "Извините, я не понимаю эту команду. Используйте /help для получения справки.",
@@ -450,6 +452,9 @@ func (h *BotHandlers) ImageHandler(ctx context.Context, b *bot.Bot, update *mode
 	// Для демонстрации отправляем заглушку
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
-		Text:   fmt.Sprintf("🖼️ Изображение для слова '%s' будет здесь!\n\n💡 Для активации этой функции настройте OPENAI_API_KEY в переменных окружения.", text),
+		Text: fmt.Sprintf(
+			"🖼️ Изображение для слова '%s' будет здесь!\n\n💡 Для активации этой функции настройте OPENAI_API_KEY в переменных окружения.",
+			text,
+		),
 	})
 }
