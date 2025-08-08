@@ -14,10 +14,26 @@ output:
       print-issued-lines: true
       print-linter-name: true
 
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
 linters-settings:
+  goimports:
+    local-prefixes: ["github.com/AndrePim/telegram_english_learn_bot"]
   govet:
     enable:
       - shadow
+      - looppointer
+  mnd:
+    checks:
+      - argument
+      - case
+      - condition
+      - operation
+      - return
+      - assign
   gocyclo:
     min-complexity: 15
   dupl:
@@ -42,28 +58,32 @@ linters-settings:
       - octalLiteral
       - whyNoLint
       - wrapperFunc
-  goimports:
-    local-prefixes: ["github.com/AndrePim/telegram_english_learn_bot"]
+  revive: # Заменяет stylecheck
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: var-naming
 
 linters:
-  disable-all: true # Аналог default: none
+  disable-all: true
   enable:
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - dupl
     - errcheck
-    - exportloopref
     - exhaustive
     - gochecknoinits
     - goconst
     - gocritic
     - gocyclo
-    - gomnd
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - lll
@@ -73,13 +93,12 @@ linters:
     - nolintlint
     - rowserrcheck
     - staticcheck
-    - stylecheck
     - unconvert
     - unparam
     - unused
     - whitespace
-    - gofmt
-    - goimports
+    - mnd
+    - revive # Заменяет stylecheck
   exclude:
     - 'Error return value of `b\.SendMessage` is not checked'
     - 'Error return value of `b\.AnswerCallbackQuery` is not checked'
@@ -90,7 +109,7 @@ issues:
   exclude-rules:
     - path: _test\.go
       linters:
-        - gomnd
+        - mnd
     - path: internal/bot/handlers.go
       linters:
         - errcheck
